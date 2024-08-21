@@ -1,0 +1,109 @@
+---
+title: "Project Penilaian Service"
+output: html_document
+date: "2023-04-17"
+---
+
+```{r}
+library("readxl")
+```
+
+
+```{r}
+data=read_excel("E:\\PAPER PAK EDDY\\DATA UJI TGL 22 APRIL 2023_REV.xlsx")
+```
+
+
+```{r}
+# Data di read menggunakan library read excel dikarenakan adanya dataset berupa data excel dengan menggunakan syntax read_excel.
+```
+
+
+
+```{r}
+data
+```
+```{r}
+#install.packages('psych')
+library(psych)
+describe(data)
+```
+```{r}
+multi.hist(data)
+```
+```{r}
+library(ggcorrplot)
+ggcorrplot(cor(data),hc.order = TRUE,
+           type = "lower",
+           lab = TRUE)
+```
+
+```{r}
+boxplot(data)
+```
+
+```{r}
+
+# model yang digunakan merupakan model structural equation model. Structured equation model merupakan model yang membantu untuk menjelaskan hubungan antara variabel terukur dengan variabel latent dan hubungan antara variabel laten. laten variabel merupaakn variabel meruapakn variabel yang secara konsep manusia mampu mengerti namun tidak dapat diukur secara langsung. Pada diatas dapat diketahui bahwa penilaian kepercayaan merupakan salah satu latent variabel yang tidak dapat diukur secara langsung namun dapat diukur dengan service characteristic, basic service, personlized service dan social attribut. Beberapa independen laten variabel diantaranya adalah quality service dan perceived reputation. beberapa arah panah menunjukan 2 latent variabel diatas diharapkan mampu memberikan efek pada e trust. kesembilan pengukuran variabel yang berada bagian kiri diharapkan memberikan dampak pada setiap independent variabelnya . Tujuan dari teknik SEM ini adalah untuk mengestimasi koefisien pada setiap panah. 
+
+```
+
+
+
+```{r}
+#install.packages('lavaan')
+library('lavaan')
+model=' X1_E_CyberThreatIntelligence=~X1.01+X1.02+X1.03
+X2_E_CustomerExperience=~X2.01+X2.02+X2.03
+X3_E_ServiceQuality=~X3.01+X3.02
+X4_E_Satisfaction=~X4.01+X4.02+X4.03
+Y5_BusinessTrust=~Y5.01+Y5.02
+X4_E_Satisfaction~X1_E_CyberThreatIntelligence+X2_E_CustomerExperience+X3_E_ServiceQuality
+Y5_BusinessTrust~X1_E_CyberThreatIntelligence+X3_E_ServiceQuality+X4_E_Satisfaction'
+
+
+```
+
+```{r}
+# model perlu didefinisikan sebelum dilakukan fiting untuk memetakan setiap hubungan yang muncul pada setiap variabel latent dan measured. Penggunaan simbol =~ digunakan untuk memberikan definisi hubungan antara latent variabel dan measured. Lalu penggunaan ~ digunakan untuk membangun model regresi antara satu latent variabel dengan lainnya. 
+```
+
+
+
+
+```{r}
+fit=sem(model,data=data)
+summary(fit,standardized=TRUE)
+```
+```{r}
+## Chi Squared Test
+# Pada chi square test didapatkan nilai p value yang menilai seberapa penting model mampu menjelaskan beberapa bagian variasi pada data. Nilai pvalue pada data perlu dibawah 0.05 untuk menjadi signifikan dan pada kasus ini nilai tersebut sudah terpenuhi pada model diatas.
+## Regression Coefficient pada Structured Equation Model
+# Pertama tama yang perlu diperhatikan adlaah pvalue pada independent latent variabel.Jika setiap p value memiliki nilai dibawah 0,05 maka spedific latent variabel memengaruhi dependent latent variabel. Pada kasus ini setiap independen latent variabel memiliki nilai dibawah 0.05 sehingga setiap independen latent memiliki pengaruh pada kinerja e_trust.
+# Selanjutnya untuk mengetahui independent latent variabel yang paling berpengaruh pada e trust dapat menggunakan koefisien yang muncul independent latent pada regresi model. Dapat terlihat bahwa quality service merupakan variabel paling berpengaruh dibandingkan dengan perceived reputation ditunjukan dengan nilai estimasi koefisien 0.865 pada quality service dan 0.162 pada perceived reputation.
+
+```
+
+```{r}
+fitmeasures(fit)
+```
+
+```{r}
+install.packages('semPlot')
+
+```
+
+```{r}
+library(semPlot)
+semPaths(fit, "std", rotation=2, layout = "tree2", curvature = 2, nCharNodes = 0, nDigits = 3,
+             sizeMan = 10, sizeInt = 15, sizeLat = 10, edge.label.cex=1.2, exoVar = FALSE, fade=FALSE)
+```
+
+```{r}
+data_gambar=data.frame(estimate_coefficient=c(0.865,0.162),latent_independent_variabel=c('quality_service','perceived reputation'))
+library(ggplot2)
+p=ggplot(data=data_gambar,aes(x=latent_independent_variabel,y=estimate_coefficient))+geom_bar(stat='identity',fill='steelblue')+geom_text(aes(label=estimate_coefficient), vjust=1.6, color="white", size=3.5)
+p+labs(title='Regression Coefficient on Structured Equation Model')
+
+```
+
